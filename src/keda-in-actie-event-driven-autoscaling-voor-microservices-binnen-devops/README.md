@@ -11,7 +11,11 @@ In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema.
 
 **KEDA,** oftewel Kubernetes Event-Driven Autoscaling, is een open-source component dat dynamische autoscaling mogelijk maakt voor Kubernetes-applicaties. In tegenstelling tot de standaard autoscaling van Kubernetes, die vaak is gebaseerd op CPU- of geheugenbelasting, stelt KEDA applicaties in staat om te schalen op basis van externe gebeurtenissen. Dit betekent dat ik bijvoorbeeld eem microservice kun laten schalen op basis van het aantal berichten in een RabbitMQ-wachtrij of de lengte van een Azure Queue.
 
-<img src="plaatjes/keda-architecture.png" width="450" align="center" alt="keda-architecture" title="KEAD Architecture">
+<figure>
+    <img src="plaatjes/keda-architecture.png"
+         alt="keda-architecture">
+    <figcaption>[KEDA Architecture](https://keda.sh/docs/2.15/concepts/#architecture)</figcaption>
+</figure>
 
 De kracht van KEDA ligt in zijn flexibiliteit. Het ondersteunt verschillende soorten `triggers` ([Sahoo, 2023](https://devtron.ai/blog/introduction-to-kubernetes-event-driven-autoscaling-keda/#what-is-keda)), zoals message queues, databases, en HTTP-requests. Hiermee kan KEDA zorgen voor een efficiëntere inzet van resources, omdat de applicatie alleen schaalt wanneer er daadwerkelijk vraag is. Dit past goed bij de dynamische architectuur van microservices, waar de belasting sterk kan variëren.
 

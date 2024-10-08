@@ -14,8 +14,9 @@ In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema.
 <figure>
     <img src="plaatjes/keda-architecture.png"
          alt="keda-architecture">
-    <figcaption>[KEDA Architecture](https://keda.sh/docs/2.15/concepts/#architecture)</figcaption>
+    <figcaption>Figuur 1 KEDA Architecture</figcaption>
 </figure>
+Bron: https://keda.sh/docs/2.15/concepts/#architecture
 
 De kracht van KEDA ligt in zijn flexibiliteit. Het ondersteunt verschillende soorten `triggers` ([Sahoo, 2023](https://devtron.ai/blog/introduction-to-kubernetes-event-driven-autoscaling-keda/#what-is-keda)), zoals message queues, databases, en HTTP-requests. Hiermee kan KEDA zorgen voor een efficiëntere inzet van resources, omdat de applicatie alleen schaalt wanneer er daadwerkelijk vraag is. Dit past goed bij de dynamische architectuur van microservices, waar de belasting sterk kan variëren.
 

@@ -7,15 +7,7 @@
 
 In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema. Met de opkomst van Kubernetes als platform voor het beheren van containergebaseerde applicaties, zijn er verschillende manieren ontstaan om applicaties automatisch te schalen. In dit blog wil ik ingaan op KEDA (Kubernetes Event-Driven Autoscaling), een tool die het mogelijk maakt om applicaties te schalen op basis van externe gebeurtenissen. Ik schrijf dit blog om inzicht te krijgen in hoe KEDA werkt, wat de voordelen en nadelen zijn, en hoe ik het kan toepassen in een microservice-omgeving. Het doel is om mijn bevindingen te delen met iedereen die geïnteresseerd is in het optimaliseren van schaalbaarheid binnen een DevOps-omgeving.
 
-In dit blog zal ik de volgende vragen beantwoorden:
-
-1. Wat is KEDA?
-2. Hoe past KEDA in het DevOps-landschap?
-3. Wat zijn de voor- en nadelen van KEDA?
-4. Wat zijn alternatieven voor KEDA?
-5. Hoe pas ik KEDA toe in het klein?
-
-## Wat is KEDA?
+## Wat is KEDA
 
 **KEDA,** oftewel Kubernetes Event-Driven Autoscaling, is een open-source component dat dynamische autoscaling mogelijk maakt voor Kubernetes-applicaties. In tegenstelling tot de standaard autoscaling van Kubernetes, die vaak is gebaseerd op CPU- of geheugenbelasting, stelt KEDA applicaties in staat om te schalen op basis van externe gebeurtenissen. Dit betekent dat je bijvoorbeeld je microservice kunt laten schalen op basis van het aantal berichten in een RabbitMQ-wachtrij of de lengte van een Azure Queue.
 
@@ -25,9 +17,15 @@ KEDA maakt gebruik van een `ScaledObject` ([KEDA | Autoscaling Azure Pipelines A
 
 Door deze eigenschappen is KEDA geschikt voor organisaties die hun Kubernetes-omgevingen willen optimaliseren op basis van specifieke werklasten en gebeurtenissen, waardoor zij kosten kunnen besparen en efficiënter kunnen omgaan met schaarse resources.
 
+## Hoe KEDA werkt
+
+1. Metrics: Keda kan een breed scala aan metrics monitoren, van eenvoudige counters tot complexe expressies. Deze metrics kunnen worden verzameld uit verschillende bronnen, zoals CloudWatch, Prometheus, en custom metrics.
+2. Triggers: Op basis van deze metrics definieert Keda triggers. Wanneer een trigger wordt geactiveerd (bijvoorbeeld wanneer het aantal berichten in een queue boven een bepaalde drempelwaarde komt), wordt een actie uitgevoerd.
+3. Acties: De meest voorkomende actie is het schalen van het aantal replica's van een Deployment of StatefulSet. Keda kan zowel omhoog als omlaag schalen, afhankelijk van de configuratie.
+
 In de volgende sectie zal ik bespreken hoe KEDA past binnen het bredere DevOps-landschap en hoe het kan bijdragen aan een betere CI/CD-pijplijn.
 
-## Hoe past KEDA in het DevOps-landschap?
+## Hoe past KEDA in het DevOps-landschap
 
 KEDA (Kubernetes-based Event Driven Autoscaling) past binnen het DevOps-landschap door het focusen op het automatiseren van schaalbaarheid op een event-driven manier. Dit sluit zeker aan bij de kernprincipes van DevOps, zoals automatisering, continue integratie en continue delivery (CI/CD), en dynamisch infrastructuurbeheer.
 Hier zijn de belangrijkste punten van hoe KEDA integreert met de DevOps-aanpak:
@@ -37,14 +35,148 @@ KEDA maakt gebruik van event-driven triggers om Kubernetes-applicaties automatis
 2. **Integratie met CI/CD-pijplijnen:**
 In een CI/CD-omgeving kan KEDA ervoor zorgen dat resources dynamisch schalen tijdens piekmomenten, zoals bij het uitrollen van nieuwe softwareversies of bij het testen van nieuwe features.
 3. **Ondersteuning van Infrastructure as Code (IaC):**
-KEDA past binnen het principe van Infrastructure as Code, een belangrijk onderdeel van DevOps, door schaalinstellingen in configuraties vast te leggen en te beheren via tools zoals Terraform en Ansible. 
+KEDA past binnen het principe van Infrastructure as Code, een belangrijk onderdeel van DevOps, door schaalinstellingen in configuraties vast te leggen en te beheren via tools zoals Terraform en Ansible.
 Dit biedt DevOps-teams de mogelijkheid om schaalbare omgevingen consistent en reproduceerbaar op te zetten, en stelt hen in staat om infrastructuurbeheer en applicaties dynamisch aan te passen op basis van daadwerkelijke vraag.
 4. **Kostenbesparing en Resource-efficiëntie:**
 KEDA helpt bij het dynamisch schalen van resources op basis van de werkelijke vraag. Dit voorkomt dat er onnodig veel resources worden gebruikt, wat bijdraagt aan kostenbesparingen in een cloud-native omgeving.
 5. **Gebruik in de praktijk:**
 Grote bedrijven zoals Microsoft maaky gebruik van [KEDA](https://learn.microsoft.com/en-us/azure/aks/keda-about#capabilities-and-features) om hun cloud-applicaties efficiënter te beheren. Microsoft gebruikt KEDA bijvoorbeeld voor Azure Functions, waar automatisch wordt opgeschaald op basis van inkomende events.
 
+### Wat zijn de voor- en nadelen van KEDA
 
+#### Voordelen van KEDA
+
+1. **Flexibiliteit in scaling**: KEDA biedt meer flexibiliteit dan de standaard Horizontal Pod Autoscaler (HPA) van Kubernetes doordat het kan schalen op basis van externe gebeurtenissen. Dit betekent dat een applicatie kan schalen op basis van de werkelijke belasting, zoals het aantal berichten in een message queue of het aantal inkomende API-verzoeken.
+
+2. **Kostenbesparing door efficiëntere resources**: Omdat KEDA applicaties alleen schaalt wanneer er daadwerkelijk vraag is, kan het helpen om onnodige resourceverspilling te voorkomen. Dit is voordelig in cloudomgevingen waar je betaalt per gebruikte resource, zoals bij Amazon Web Services (AWS) of Microsoft Azure.
+
+3. **Eenvoudige integratie met bestaande Kubernetes-clusters**: KEDA kan eenvoudig worden toegevoegd aan een bestaand Kubernetes-cluster zonder dat er veel aanpassingen nodig zijn. Het is compatibel met bestaande autoscaling-mechanismen en kan als aanvulling werken op HPA.
+
+4. **Ondersteuning voor diverse triggers**: KEDA ondersteunt een breed scala aan triggers, zoals RabbitMQ, Kafka, Prometheus-metrics, en vele andere. Dit maakt het geschikt voor verschillende soorten microservice-architecturen en workflows.
+
+#### Nadelen van KEDA
+
+1. **Complexiteit voor kleinere projecten**: Voor kleinere projecten kan de inzet van KEDA een overkill zijn. De extra configuratie en het beheer kunnen meer tijd kosten dan wat je wint aan schaalbaarheid. Voor eenvoudige microservices kan een standaard HPA op basis van CPU of geheugen vaak al voldoende zijn.
+
+2. **Afhankelijkheid van externe gebeurtenissen**: Omdat KEDA is gebaseerd op externe triggers, is de configuratie sterk afhankelijk van de betrouwbaarheid van deze gebeurtenisbronnen. Als de gebeurtenisbron tijdelijk niet beschikbaar is, kan dit invloed hebben op de werking van de autoscaling.
+
+3. **Leercurve**: KEDA heeft een leercurve, vooral voor teams die nieuw zijn met Kubernetes en event-driven architecturen. Het begrijpen van hoe je `ScaledObject` en `TriggerAuthentication` correct configureert, vergt tijd en oefening, zeker als je werkt met complexe gebeurtenisbronnen.
+
+4. **Minder fijnmazige controle in vergelijking met andere tools**: Hoewel KEDA flexibel is, bieden sommige alternatieve scaling-tools of custom controllers meer controle over specifieke scaling-scenario's. Dit kan een nadeel zijn wanneer je erg specifieke schaalbehoeften hebt die verder gaan dan de standaard mogelijkheden van KEDA.
+
+## Deelvraag 4: Wat zijn alternatieven voor KEDA
+
+### Wat zijn alternatieven voor KEDA
+
+Er zijn verschillende alternatieve oplossingen voor autoscaling in Kubernetes die zich richten op andere aspecten van schaalbaarheid. Hier bespreek ik drie veelgebruikte alternatieven: HPA, Knative en custom controllers.
+
+#### 1. **Horizontal Pod Autoscaler (HPA)**
+
+- **Werking**: HPA is de standaard autoscaling-oplossing binnen Kubernetes. Het schaalt applicaties op basis van resourcegebruik zoals CPU- en geheugenverbruik. HPA monitort deze metrics en schaalt het aantal pod-replicas automatisch op of af, afhankelijk van de belasting.
+- **Voordelen**: HPA is eenvoudig te configureren en vereist geen extra tools of configuraties buiten Kubernetes. Dit maakt het geschikt voor de meeste standaard workloads.
+- **Nadelen**: HPA mist de flexibiliteit van KEDA als het gaat om schalen op basis van externe gebeurtenissen. HPA kan niet direct schalen op basis van metrics zoals de lengte van een wachtrij of inkomende API-verzoeken zonder extra configuraties.
+- **Gebruiksscenario's**: HPA is een goede keuze voor applicaties met voorspelbare belasting en gebruikspatronen waarbij CPU- en geheugenverbruik een goede indicatie zijn voor de belasting van de applicatie.
+
+#### 2. **Knative**
+
+- **Werking**: Knative is een Kubernetes-gebaseerde platformlaag die is ontworpen om serverless toepassingen te draaien. Knative Serving maakt het mogelijk om applicaties automatisch te schalen, zelfs tot nul, wanneer er geen verkeer is. Dit maakt het een goede keuze voor serverless architecturen.
+- **Voordelen**: Knative biedt naadloze schaalbaarheid en kan beter omgaan met pieken in korte tijdsbestekken door direct te reageren op HTTP-verkeer. Het is bijzonder geschikt voor serverless workloads.
+- **Nadelen**: Knative kan complexer zijn om op te zetten dan KEDA, omdat het afhankelijk is van verschillende componenten zoals Knative Serving en Eventing. Het kan ook overbodig zijn voor applicaties die niet per se serverless hoeven te zijn.
+- **Gebruiksscenario's**: Knative is ideaal voor serverless architecturen waarbij applicaties automatisch moeten kunnen opschalen en terugschalen naar nul wanneer er geen vraag is. Het is minder geschikt als je applicaties niet de serverless benadering nodig hebben.
+
+#### 3. **Custom Controllers**
+
+- **Werking**: Met custom controllers kunnen ontwikkelaars zelf logica schrijven voor het schalen van applicaties in Kubernetes. Dit biedt volledige controle over wanneer en hoe een applicatie schaalt, gebaseerd op custom metrics of gebeurtenissen.
+- **Voordelen**: Custom controllers bieden maximale flexibiliteit en kunnen volledig worden aangepast aan de behoeften van een specifieke toepassing.
+- **Nadelen**: Het ontwikkelen en onderhouden van custom controllers kan tijdrovend zijn en vereist diepgaande kennis van Kubernetes API’s en controllers. Dit maakt het minder geschikt voor teams zonder uitgebreide Kubernetes-ervaring.
+- **Gebruiksscenario's**: Custom controllers zijn een goede keuze voor organisaties die zeer specifieke schaalbehoeften hebben die niet door standaardtools zoals KEDA of HPA worden ondersteund.
+
+### Vergelijking van KEDA met Alternatieven
+
+KEDA onderscheidt zich door de mogelijkheid om te schalen op basis van externe gebeurtenissen, wat het een goede keuze maakt voor event-driven microservices. HPA is meer geschikt voor standaard scenarios waarbij CPU- of geheugengebruik een betrouwbare indicator is voor de belasting. Knative biedt meer voordelen voor serverless architecturen, maar brengt ook meer complexiteit met zich mee. Custom controllers bieden de meeste flexibiliteit, maar vereisen een hogere ontwikkelinspanning en expertise.
+
+## Hoe pas ik KEDA toe in het klein
+
+### Stap 1: Voorbereidingen
+
+Voor deze test heb ik een lokale Kubernetes-omgeving opgezet met Minikube. Minikube is handig omdat het een lokaal Kubernetes-cluster simuleert, ideaal voor testdoeleinden. Daarnaast heb ik Helm geïnstalleerd, een package manager voor Kubernetes, om KEDA eenvoudig te kunnen installeren.
+
+### Stap 2: Installeren van KEDA
+
+Met Helm heb ik KEDA in het Kubernetes-cluster geïnstalleerd:
+
+```bash
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+helm install keda kedacore/keda
+```
+
+Dit commando installeert KEDA in het cluster. Na de installatie heb ik gecontroleerd of de KEDA-pods draaiden met:
+
+```bash
+kubectl get pods -n keda
+```
+
+### Stap 3: Configureren van een Microservice en een ScaledObject
+
+Ik heb een eenvoudige Node.js-microservice gemaakt die berichten verwerkt uit een RabbitMQ-wachtrij. Vervolgens heb ik een Kubernetes Deployment gemaakt om de microservice in het cluster te draaien:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-processor
+  template:
+    metadata:
+      labels:
+        app: message-processor
+    spec:
+      containers:
+      - name: message-processor
+        image: <je-microservice-image>
+        ports:
+        - containerPort: 8080
+
+```
+
+De image verwijst naar een Docker-image van mijn microservice, gehost op Docker Hub.
+
+Vervolgens heb ik een ScaledObject gedefinieerd om de scaling-logica te beheren. Dit object vertelt KEDA hoe en wanneer de microservice automatisch moet schalen op basis van de belasting van de RabbitMQ-wachtrij:
+
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: rabbitmq-scaledobject
+  namespace: default
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: message-processor
+  pollingInterval: 30  # Interval waarmee KEDA de wachtrij controleert
+  cooldownPeriod: 300  # Tijd die KEDA wacht voordat het weer naar beneden schaalt
+  minReplicaCount: 1   # Minimale aantal replicas
+  maxReplicaCount: 10  # Maximale aantal replicas
+  triggers:
+  - type: rabbitmq
+    metadata:
+      queueName: my-queue
+      host: amqp://<rabbitmq-host-url>
+      queueLength: "5"  # Schaal als er meer dan 5 berichten in de wachtrij staan
+```
+
+Dit ScaledObject zorgt ervoor dat de message-processor-service opschaalt als er meer dan 5 berichten in de wachtrij staan, en terugschakelt als de belasting afneemt.
+
+### Stap 4: Testen van de Scaling
+
+Om te testen of KEDA correct werkt, heb ik berichten in de RabbitMQ-wachtrij geplaatst en geobserveerd hoe KEDA de microservice automatisch opschaalde. Met het commando kubectl get deployments kon ik het aantal actieve replicas monitoren.
+
+Tijdens de test schaalde de microservice omhoog naarmate de berichten in de wachtrij toenamen, en terug naar beneden zodra de wachtrij weer leeg was. Dit toonde aan dat KEDA effectief de belasting van de microservice kon beheren op basis van de gebeurtenissen.
 
 ## Bronnen
 

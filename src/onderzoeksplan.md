@@ -42,15 +42,15 @@ Voor mijn minor DevOps aan de HAN ga ik een onderzoek doen naar KEDA (Kubernetes
 
 ## Planning (1 week)
 
-| Dag          | Activiteit                                                   | Opmerkingen                                             |
-|--------------|---------------------------------------------------------------|---------------------------------------------------------|
-| Dag 1        | Literatuuronderzoek voor deelvraag 1 en 2                      | Zoek artikelen en documentatie over KEDA en DevOps.     |
-| Dag 2        | Analyse van voor- en nadelen van KEDA (deelvraag 3)            | Lees casestudies en gebruikerservaringen.               |
-| Dag 3        | Onderzoek naar alternatieven voor KEDA (deelvraag 4)           | Vergelijk met HPA en andere scaling tools.              |
-| Dag 4        | Praktijktest opzetten (deelvraag 5)                            | Installeer KEDA in een Kubernetes-cluster en test.      |
-| Dag 5        | Afronding van het experiment en resultaten verwerken           | Documenteer bevindingen uit de test.                    |
-| Dag 6        | Samenvatten van de bevindingen en conclusies formuleren        | Werk aan de presentatie en samenvatting van het onderzoek. |
-| Dag 7        | Controle en aanpassingen onderzoek en presentatie voorbereiden | Review en maak de presentatie in een visueel format.    |
+| Dag          | Activiteit                                                     | Opmerkingen                                               |
+|--------------|----------------------------------------------------------------|-----------------------------------------------------------|
+| Dag 1        | Literatuuronderzoek voor deelvraag 1 en 2                      | Zoek artikelen en documentatie over KEDA en DevOps.       |
+| Dag 2        | Analyse van voor- en nadelen van KEDA (deelvraag 3)            | Lees casestudies en gebruikerservaringen.                 |
+| Dag 3        | Onderzoek naar alternatieven voor KEDA (deelvraag 4)           | Vergelijk met HPA en andere scaling tools.                |
+| Dag 4        | Praktijktest opzetten (deelvraag 5)                            | Installeer KEDA in een Kubernetes-cluster en test.        |
+| Dag 5        | Afronding van het experiment en resultaten verwerken           | Documenteer bevindingen uit de test.                      |
+| Dag 6        | Samenvatten van de bevindingen en conclusies formuleren        | Werk aan de presentatie en samenvatting van het onderzoek.|
+| Dag 7        | Controle en aanpassingen onderzoek en presentatie voorbereiden | Review en maak de presentatie in een visueel format.      |
 
 ## Verwachte Resultaten
 

@@ -11,19 +11,17 @@ In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema.
 
 **KEDA,** oftewel [Kubernetes](https://kubernetes.io/) Event-Driven Autoscaling, is een open-source component dat dynamische autoscaling mogelijk maakt voor Kubernetes-applicaties. In tegenstelling tot de standaard autoscaling van Kubernetes, die vaak is gebaseerd op CPU- of geheugenbelasting, stelt KEDA applicaties in staat om te schalen op basis van externe events. Dit betekent dat ik een microservice kun laten schalen op basis van het aantal events die verwerkt moeten worden. Bijvoorbeeld: Op basis van het aantalberichten in een RabbitMQ-wachtrij.
 
-**KEDA** is eingelijk een lichtgewicht component dat een developer kan toeveogend aan Kubernetes-cluster. Daarnaast werkt KEDA samen met de standaard Kubernetes-componenten zoals de [HPA(Horizontal Pod Autoscaler)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en kan functionaliteit uitbreiden zonder te overschrijven of dupliceren.
+**KEDA** is eingelijk een lichtgewicht component dat een DevOps-team kan toeveogen aan Kubernetes-cluster. Daarnaast werkt KEDA samen met de standaard Kubernetes-componenten zoals de [HPA(Horizontal Pod Autoscaler)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en kan functionaliteit uitbreiden zonder te overschrijven of dupliceren.
 
 **KEDA** is gebouwd op Kubernetes [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en schaalt pods op basis van informatie uit event sources zoals AWS SQS, Kafka, RabbitMQ, etc. Deze event worden bewaakt met scalers, die implementaties activeren of deactiveren op basis van de regels die voor hen zijn ingesteld. KEDA-scalers kunnen ook aangepaste metrische gegevens voor een specifieke event  invoeren, zodat DevOps-teams metrische gegevens kunnen observeren die voor hen relevant zijn.
 
 <figure>
     <img src="plaatjes/different-kubernetes-autoscaling-features-vpa-keda-and-hpa.png"
-         alt="different-kubernetes-autoscaling-features-vpa-keda-and-hpa">
-    <figcaption>Different Kubernetes autoscaling features: VPA, KEDA, and HPA</figcaption>
+         alt="different-kubernetes-autoscaling-features-vpa-keda-and-hpa" align="center">
+    <figcaption>Figuur 1 Different Kubernetes autoscaling features: VPA, KEDA, and HPA</figcaption>
 </figure>
 <br>
 Bron: https://devtron.ai/blog/introduction-to-kubernetes-event-driven-autoscaling-keda/
-
-De kracht van KEDA ligt in zijn flexibiliteit. Als developer kan je expliciet de apps toewijzen die je wilt gebruiken voor `event-driven` scale, terwijl andere apps blijven functioneren.
 
 ## Hoe KEDA werkt
 
@@ -84,13 +82,11 @@ Grote bedrijven zoals Microsoft maaky gebruik van [KEDA](https://learn.microsoft
 
 1. **Complexiteit voor kleinere projecten**: Voor kleinere projecten kan de inzet van KEDA een overkill zijn. De extra configuratie en het beheer kunnen meer tijd kosten dan wat je wint aan schaalbaarheid. Voor eenvoudige microservices kan een standaard HPA op basis van CPU of geheugen vaak al voldoende zijn.
 
-2. **Afhankelijkheid van externe events**: Omdat KEDA is gebaseerd op externe triggers, is de configuratie sterk afhankelijk van de betrouwbaarheid van deze gebeurtenisbronnen. Als de gebeurtenisbron tijdelijk niet beschikbaar is, kan dit invloed hebben op de werking van de autoscaling.
+2. **Afhankelijkheid van externe events**: Omdat KEDA is gebaseerd op externe triggers, is de configuratie sterk afhankelijk van de betrouwbaarheid van deze events sources. Als een event sources tijdelijk niet beschikbaar is, kan dit invloed hebben op de werking van de autoscaling.
 
-3. **Leercurve**: KEDA heeft een leercurve, vooral voor teams die nieuw zijn met Kubernetes en event-driven architecturen. Het begrijpen van hoe je `ScaledObject` en `TriggerAuthentication` correct configureert, vergt tijd en oefening, zeker als je werkt met complexe gebeurtenisbronnen.
+3. **Leercurve**: KEDA heeft een leercurve, vooral voor teams die nieuw zijn met Kubernetes en event-driven architecturen. Het begrijpen van hoe je `ScaledObject` en `TriggerAuthentication` correct configureert, vergt tijd en oefening, zeker als je werkt met complexe events sources.
 
 4. **Minder fijnmazige controle in vergelijking met andere tools**: Hoewel KEDA flexibel is, bieden sommige alternatieve scaling-tools of custom controllers meer controle over specifieke scaling-scenario's. Dit kan een nadeel zijn wanneer je erg specifieke schaalbehoeften hebt die verder gaan dan de standaard mogelijkheden van KEDA.
-
-## Deelvraag 4: Wat zijn alternatieven voor KEDA
 
 ### Wat zijn alternatieven voor KEDA
 
@@ -98,14 +94,14 @@ Er zijn verschillende alternatieve oplossingen voor autoscaling in Kubernetes di
 
 #### 1. **Horizontal Pod Autoscaler (HPA)**
 
-- **Werking**: HPA is de standaard autoscaling-oplossing binnen Kubernetes. Het schaalt applicaties op basis van resourcegebruik zoals CPU- en geheugenverbruik. HPA monitort deze metrics en schaalt het aantal pod-replicas automatisch op of af, afhankelijk van de belasting.
+- **Werking**: [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) is de standaard autoscaling-oplossing binnen Kubernetes. Het schaalt applicaties op basis van resourcegebruik zoals CPU- en geheugenverbruik. HPA monitort deze metrics en schaalt het aantal pod-replicas automatisch op of af, afhankelijk van de belasting.
 - **Voordelen**: HPA is eenvoudig te configureren en vereist geen extra tools of configuraties buiten Kubernetes. Dit maakt het geschikt voor de meeste standaard workloads.
 - **Nadelen**: HPA mist de flexibiliteit van KEDA als het gaat om schalen op basis van externe events. HPA kan niet direct schalen op basis van metrics zoals de lengte van een wachtrij of inkomende API-verzoeken zonder extra configuraties.
 - **Gebruiksscenario's**: HPA is een goede keuze voor applicaties met voorspelbare belasting en gebruikspatronen waarbij CPU- en geheugenverbruik een goede indicatie zijn voor de belasting van de applicatie.
 
 #### 2. **Knative**
 
-- **Werking**: Knative is een Kubernetes-gebaseerde platformlaag die is ontworpen om serverless toepassingen te draaien. Knative Serving maakt het mogelijk om applicaties automatisch te schalen, zelfs tot nul, wanneer er geen verkeer is. Dit maakt het een goede keuze voor serverless architecturen.
+- **Werking**: [Knative](https://knative.dev/docs/) is een Kubernetes-gebaseerde platformlaag die is ontworpen om serverless toepassingen te draaien. Knative Serving maakt het mogelijk om applicaties automatisch te schalen, zelfs tot nul, wanneer er geen verkeer is. Dit maakt het een goede keuze voor serverless architecturen.
 - **Voordelen**: Knative biedt naadloze schaalbaarheid en kan beter omgaan met pieken in korte tijdsbestekken door direct te reageren op HTTP-verkeer. Het is bijzonder geschikt voor serverless workloads.
 - **Nadelen**: Knative kan complexer zijn om op te zetten dan KEDA, omdat het afhankelijk is van verschillende componenten zoals Knative Serving en Eventing. Het kan ook overbodig zijn voor applicaties die niet per se serverless hoeven te zijn.
 - **Gebruiksscenario's**: Knative is ideaal voor serverless architecturen waarbij applicaties automatisch moeten kunnen opschalen en terugschalen naar nul wanneer er geen vraag is. Het is minder geschikt als je applicaties niet de serverless benadering nodig hebben.
@@ -117,7 +113,7 @@ Er zijn verschillende alternatieve oplossingen voor autoscaling in Kubernetes di
 - **Nadelen**: Het ontwikkelen en onderhouden van custom controllers kan tijdrovend zijn en vereist diepgaande kennis van Kubernetes API’s en controllers. Dit maakt het minder geschikt voor teams zonder uitgebreide Kubernetes-ervaring.
 - **Gebruiksscenario's**: Custom controllers zijn een goede keuze voor organisaties die zeer specifieke schaalbehoeften hebben die niet door standaardtools zoals KEDA of HPA worden ondersteund.
 
-### Vergelijking van KEDA met Alternatieven
+#### Vergelijking KEDA met Alternatieven
 
 KEDA onderscheidt zich door de mogelijkheid om te schalen op basis van externe events, wat het een goede keuze maakt voor event-driven microservices. HPA is meer geschikt voor standaard scenarios waarbij CPU- of geheugengebruik een betrouwbare indicator is voor de belasting. Knative biedt meer voordelen voor serverless architecturen, maar brengt ook meer complexiteit met zich mee. Custom controllers bieden de meeste flexibiliteit, maar vereisen een hogere ontwikkelinspanning en expertise.
 

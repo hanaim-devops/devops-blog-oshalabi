@@ -5,24 +5,15 @@
 *[Osama Halabi, oktober 2024.](https://github.com/hanaim-devops/devops-blog-oshalabi)*
 <hr/>
 
-In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema. Met de opkomst van Kubernetes als platform voor het beheren van containergebaseerde applicaties, zijn er verschillende manieren ontstaan om applicaties automatisch te schalen. In dit blog wil ik ingaan op KEDA (Kubernetes Event-Driven Autoscaling), een tool die het mogelijk maakt om applicaties te schalen op basis van externe gebeurtenissen. Ik schrijf dit blog om inzicht te krijgen in wat KEDA is, hoe KEDA werkt, wat de voordelen en nadelen zijn, en hoe ik het kan toepassen in een microservice-omgeving. Daarnaast wil ik met deze blogpost anderen inspireren om KEDA te overwegen als een oplossing voor schaalproblemen in hun eigen DevOps-omgevingen.
+In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema. Met de opkomst van Kubernetes als platform voor het beheren van containergebaseerde applicaties, zijn er verschillende manieren ontstaan om applicaties automatisch te schalen. In dit blog wil ik ingaan op KEDA (Kubernetes Event-Driven Autoscaling), een tool die het mogelijk maakt om applicaties te schalen op basis van externe events. Ik schrijf dit blog om inzicht te krijgen in wat KEDA is, hoe KEDA werkt, wat de voordelen en nadelen zijn, en hoe ik het kan toepassen in een microservice-omgeving. Daarnaast wil ik met deze blogpost anderen inspireren om KEDA te overwegen als een oplossing voor schaalproblemen in hun eigen DevOps-omgevingen.
 
 ## Wat is KEDA
 
-**KEDA,** oftewel Kubernetes Event-Driven Autoscaling, is een open-source component dat dynamische autoscaling mogelijk maakt voor Kubernetes-applicaties. In tegenstelling tot de standaard autoscaling van Kubernetes, die vaak is gebaseerd op CPU- of geheugenbelasting, stelt KEDA applicaties in staat om te schalen op basis van externe gebeurtenissen. Dit betekent dat ik bijvoorbeeld eem microservice kun laten schalen op basis van het aantal berichten in een RabbitMQ-wachtrij of de lengte van een Azure Queue.
+**KEDA,** oftewel [Kubernetes](https://kubernetes.io/) Event-Driven Autoscaling, is een open-source component dat dynamische autoscaling mogelijk maakt voor Kubernetes-applicaties. In tegenstelling tot de standaard autoscaling van Kubernetes, die vaak is gebaseerd op CPU- of geheugenbelasting, stelt KEDA applicaties in staat om te schalen op basis van externe events. Dit betekent dat ik een microservice kun laten schalen op basis van het aantal events die verwerkt moeten worden. Bijvoorbeeld: Op basis van het aantalberichten in een RabbitMQ-wachtrij.
 
-<figure>
-    <img src="plaatjes/keda-architecture.png"
-         alt="keda-architecture">
-    <figcaption>Figuur 1 KEDA Architecture</figcaption>
-</figure>
-<br>
-Bron: https://keda.sh/docs/2.15/concepts/#architecture
+**KEDA** is eingelijk een lichtgewicht component dat een developer kan toeveogend aan Kubernetes-cluster. Daarnaast werkt KEDA samen met de standaard Kubernetes-componenten zoals de [HPA(Horizontal Pod Autoscaler)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en kan functionaliteit uitbreiden zonder te overschrijven of dupliceren.
 
-
-De kracht van KEDA ligt in zijn flexibiliteit. Het ondersteunt verschillende soorten `triggers` ([Sahoo, 2023](https://devtron.ai/blog/introduction-to-kubernetes-event-driven-autoscaling-keda/#what-is-keda)), zoals message queues, databases, en HTTP-requests. Hiermee kan KEDA zorgen voor een efficiëntere inzet van resources, omdat de applicatie alleen schaalt wanneer er daadwerkelijk vraag is. Dit past goed bij de dynamische architectuur van microservices, waar de belasting sterk kan variëren.
-
-KEDA maakt gebruik van een `ScaledObject` ([KEDA | Autoscaling Azure Pipelines Agents With KEDA, 2021](https://keda.sh/blog/2021-05-27-azure-pipelines-scaler/)), een Kubernetes-resource waarmee je kunt definiëren hoe en wanneer een applicatie moet schalen. Dit object specificeert bijvoorbeeld de naam van de deployment die moet worden geschaald, de minimale en maximale aantallen replica's, en de gebeurtenisbron waarop geschaald moet worden.
+De kracht van KEDA ligt in zijn flexibiliteit. Als developer kan je expliciet de apps toewijzen die je wilt gebruiken voor `event-driven` scale, terwijl andere apps blijven functioneren.
 
 Door deze eigenschappen is KEDA geschikt voor organisaties die hun Kubernetes-omgevingen willen optimaliseren op basis van specifieke werklasten en gebeurtenissen, waardoor zij kosten kunnen besparen en efficiënter kunnen omgaan met schaarse resources.
 
@@ -34,7 +25,7 @@ KEDA speelt een belangrijke rol in Kubernetes-omgevingen door het automatisch sc
    KEDA fungeert als een agent die Kubernetes Deployments kan activeren en deactiveren, waardoor het mogelijk is om te schalen naar nul wanneer er geen actieve gebeurtenissen zijn. Dit betekent dat, in plaats van voortdurend een bepaald aantal pods in stand te houden, KEDA de applicatie volledig kan uitschakelen wanneer er geen werk is en deze weer kan inschakelen zodra er nieuwe gebeurtenissen binnenkomen. Deze functionaliteit wordt beheerd door de `keda-operator` container, die draait wanneer je KEDA installeert.
 
 2. **Metrics-collectie:**
-   KEDA is in staat om een breed scala aan metrics te monitoren, variërend van eenvoudige counters tot complexe meetgegevens. Deze metrics kunnen afkomstig zijn uit diverse bronnen zoals cloud-gebaseerde services (bijv. AWS CloudWatch), monitoring-tools (bijv. Prometheus), of zelfs custom metrics die specifiek zijn voor een applicatie. Door deze metrics te verzamelen, kan KEDA nauwkeurig bepalen wanneer er behoefte is aan meer (of minder) resources.
+   KEDA is in staat om een breed scala aan metrics te monitoren, variërend van eenvoudige counters tot complexe meetgegevens. Deze metrics kunnen afkomstig zijn uit diverse bronnen zoals cloud-gebaseerde services (bijv. AWS CloudWatch), `monitoring-tools` (bijv. Prometheus), of zelfs custom metrics die specifiek zijn voor een applicatie. Door deze metrics te verzamelen, kan KEDA nauwkeurig bepalen wanneer er behoefte is aan meer (of minder) resources.
 
 3. **Triggers:**
    Op basis van de verzamelde metrics definieert KEDA zogenaamde triggers. Een trigger is een conditie die aangeeft wanneer er moet worden opgeschaald of afgeschaald. Bijvoorbeeld, een trigger kan worden geactiveerd wanneer het aantal berichten in een wachtrij een bepaalde drempel overschrijdt, zoals 100 berichten in een RabbitMQ-queue. Zodra de trigger afgaat, bepaalt KEDA dat het tijd is om actie te ondernemen.
@@ -42,7 +33,15 @@ KEDA speelt een belangrijke rol in Kubernetes-omgevingen door het automatisch sc
 4. **Acties:**
     Wanneer een trigger wordt geactiveerd, voert KEDA acties uit om de applicatie schaalbaar te maken. De meest gebruikelijke actie is het aanpassen van het aantal replica's van een Deployment of StatefulSet. KEDA kan automatisch het aantal actieve pods verhogen wanneer er meer werk is (bijv. een toename van berichten in een queue) en het aantal pods verlagen wanneer de werkdruk afneemt. Dit zorgt voor een efficiënte en flexibele schaalbaarheid van applicaties, waarbij resources alleen worden gebruikt wanneer dat nodig is.
 
-In de volgende sectie zal ik bespreken hoe KEDA past binnen het bredere DevOps-landschap en hoe het kan bijdragen aan een betere CI/CD-pijplijn.
+Het onderstaande diagram laat zien hoe KEDA samenwerkt met de Kubernetes HPA, external event sources en de [etcd](https://etcd.io/) data store van Kubernetes:
+
+<figure>
+    <img src="plaatjes/keda-architecture.png"
+         alt="keda-architecture">
+    <figcaption>Figuur 1 KEDA Architecture</figcaption>
+</figure>
+<br>
+Bron: https://keda.sh/docs/2.15/concepts/#architecture
 
 ## Hoe past KEDA in het DevOps-landschap
 
@@ -50,7 +49,7 @@ KEDA (Kubernetes-based Event Driven Autoscaling) past binnen het DevOps-landscha
 Hier zijn de belangrijkste punten van hoe KEDA integreert met de DevOps-aanpak:
 
 1. **Automatisering van schaalbaarheid:**
-KEDA maakt gebruik van event-driven triggers om Kubernetes-applicaties automatisch op te schalen. Hierdoor kunnen DevOps-teams de schaalbaarheid afstemmen op specifieke externe gebeurtenissen zoals een toename in het aantal berichten in een wachtrij of verhoogde API-verzoeken. Dit vermindert de noodzaak van handmatige interventie, wat perfect past bij de DevOps-benadering van geautomatiseerde processen.
+KEDA maakt gebruik van event-driven triggers om Kubernetes-applicaties automatisch op te schalen. Hierdoor kunnen DevOps-teams de schaalbaarheid afstemmen op specifieke externe events zoals een toename in het aantal berichten in een wachtrij of verhoogde API-verzoeken. Dit vermindert de noodzaak van handmatige interventie, wat perfect past bij de DevOps-benadering van geautomatiseerde processen.
 2. **Integratie met CI/CD-pijplijnen:**
 In een CI/CD-omgeving kan KEDA ervoor zorgen dat resources dynamisch schalen tijdens piekmomenten, zoals bij het uitrollen van nieuwe softwareversies of bij het testen van nieuwe features.
 3. **Ondersteuning van Infrastructure as Code (IaC):**

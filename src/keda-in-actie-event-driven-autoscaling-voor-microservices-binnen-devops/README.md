@@ -269,5 +269,5 @@ In dit blog heb ik de voordelen van KEDA voor event-driven autoscaling in Kubern
 - KEDA. (z.d.). KEDA. https://keda.sh/
 - Tomkerkhove. (2024, 6 augustus). Kubernetes Event-driven Autoscaling (KEDA) - Azure Kubernetes Service. Microsoft Learn. https://learn.microsoft.com/en-us/azure/aks/keda-about#capabilities-and-features
 - Singh, G. (2024, 8 oktober). KEDA (Kubernetes Event-driven Autoscaling). XenonStack. https://www.xenonstack.com/blog/kubernetes-event-driven-autoscaling
-- KEDA | Authentication. (z.d.). KEDA. https://keda.sh/docs/2.15/concepts/authentication/#authentication-scopes-namespace-vs-cluster KEDA | ScaledObject specification. (z.d.). KEDA. https://keda.sh/docs/2.15/reference/scaledobject-spec/
+- KEDA | Authentication. (z.d.). KEDA. https://keda.sh/docs/2.15/concepts/authentication/#authentication-scopes-namespace-vs-cluster
 - KEDA | ScaledObject specification. (z.d.). KEDA. https://keda.sh/docs/2.15/reference/scaledobject-spec/

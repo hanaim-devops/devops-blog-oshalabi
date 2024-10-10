@@ -5,7 +5,7 @@
 *[Osama Halabi, oktober 2024.](https://github.com/hanaim-devops/devops-blog-oshalabi)*
 <hr/>
 
-In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema. Met de opkomst van Kubernetes als platform voor het beheren van containergebaseerde applicaties, zijn er verschillende manieren ontstaan om applicaties automatisch te schalen. In dit blog wil ik ingaan op KEDA (Kubernetes Event-Driven Autoscaling), een tool die het mogelijk maakt om applicaties te schalen op basis van externe events. Ik schrijf dit blog om inzicht te krijgen in wat KEDA is, hoe KEDA werkt, wat de voordelen en nadelen zijn, en hoe ik het kan toepassen in een microservice-omgeving. Daarnaast wil ik met deze blogpost anderen inspireren om KEDA te overwegen als een oplossing voor schaalproblemen in hun eigen DevOps-omgevingen.
+In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema. Met de opkomst van Kubernetes als platform voor het beheren van containergebaseerde applicaties, zijn er verschillende manieren ontstaan om applicaties automatisch te schalen. In dit blog wil ik ingaan op KEDA (Kubernetes Event-Driven Autoscaling), een tool die het mogelijk maakt om applicaties te schalen op basis van externe events. Ik schrijf dit blog om inzicht te krijgen in wat KEDA is, hoe KEDA werkt, wat de voordelen en nadelen zijn, en hoe ik het kan toepassen in een microservice-omgeving zoals Pitstop. Daarnaast wil ik met deze blogpost anderen inspireren om KEDA te overwegen als een oplossing voor schaalproblemen in hun eigen DevOps-omgevingen.
 
 ## Wat is KEDA
 
@@ -17,7 +17,7 @@ In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema.
 
 <figure>
     <img src="plaatjes/different-kubernetes-autoscaling-features-vpa-keda-and-hpa.png"
-         alt="different-kubernetes-autoscaling-features-vpa-keda-and-hpa" align="center">
+         alt="different-kubernetes-autoscaling-features-vpa-keda-and-hpa">
     <figcaption>Figuur 1 Different Kubernetes autoscaling features: VPA, KEDA, and HPA</figcaption>
 </figure>
 <br>
@@ -117,7 +117,7 @@ Er zijn verschillende alternatieve oplossingen voor autoscaling in Kubernetes di
 
 KEDA onderscheidt zich door de mogelijkheid om te schalen op basis van externe events, wat het een goede keuze maakt voor event-driven microservices. HPA is meer geschikt voor standaard scenarios waarbij CPU- of geheugengebruik een betrouwbare indicator is voor de belasting. Knative biedt meer voordelen voor serverless architecturen, maar brengt ook meer complexiteit met zich mee. Custom controllers bieden de meeste flexibiliteit, maar vereisen een hogere ontwikkelinspanning en expertise.
 
-## Hoe pas ik KEDA toe in het klein
+## Hoe pas ik KEDA toe PitStop MSA applicatie
 
 ### Stap 1: Voorbereidingen
 
@@ -130,7 +130,7 @@ Met Helm heb ik KEDA in het Kubernetes-cluster geïnstalleerd:
 ```bash
 helm repo add kedacore https://kedacore.github.io/charts
 helm repo update
-helm install keda kedacore/keda
+helm install keda kedacore/keda --namespace keda --create-namespace
 ```
 
 Dit commando installeert KEDA in het cluster. Na de installatie heb ik gecontroleerd of de KEDA-pods draaiden met:
@@ -139,66 +139,120 @@ Dit commando installeert KEDA in het cluster. Na de installatie heb ik gecontrol
 kubectl get pods -n keda
 ```
 
-### Stap 3: Configureren van een Microservice en een ScaledObject
+Het resultaat moet zo als volgt:
 
-Ik heb een eenvoudige Node.js-microservice gemaakt die berichten verwerkt uit een RabbitMQ-wachtrij. Vervolgens heb ik een Kubernetes Deployment gemaakt om de microservice in het cluster te draaien:
+<figure>
+    <img src="plaatjes/keda-pod.png"
+         alt="keda-pods">
+    <figcaption>Figuur 3 KEDA pods</figcaption>
+</figure>
+<br>
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: message-processor
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: message-processor
-  template:
-    metadata:
-      labels:
-        app: message-processor
-    spec:
-      containers:
-      - name: message-processor
-        image: <je-microservice-image>
-        ports:
-        - containerPort: 8080
+### Stap 3: PitStop configureren
 
+Omdat **Pitstop** gebruikmaakt van RabbitMQ voor het verwerken van berichten tussen microservices, heb ik de nodige configuraties ingesteld om **KEDA**  in een Kubernetes-omgeving te draaien te gebruiken voor automatische scaling op basis van de belasting in de RabbitMQ-wachtrijen.
+
+#### Configuratie van KEDA met RabbitMQ
+
+Om ervoor te zorgen dat de `message-processor-service` automatisch schaalt op basis van de berichtenbelasting in de RabbitMQ-wachtrij, heb ik zowel een TriggerAuthentication als een ScaledObject ingesteld.
+
+##### TriggerAuthentication
+  
+Voor veilige toegang tot RabbitMQ heb ik een Kubernetes Secret en een TriggerAuthentication aangemaakt:
+
+- **Secret:** Dit object bevat de inloggegevens voor RabbitMQ, zodat ze veilig kunnen worden gebruikt zonder blootstelling van gevoelige gegevens:
+
+```bash
+kubectl create secret generic rabbitmq-secret \
+  --namespace=pitstop \
+  --from-literal=username=rabbitmquser \
+  --from-literal=password=DEBmbwkSrzy9D1T9cJfa
 ```
 
-De image verwijst naar een Docker-image van mijn microservice, gehost op Docker Hub.
+- **TriggerAuthentication:** Deze configuratie zorgt ervoor dat de RabbitMQ-gebruikersnaam en het wachtwoord op een veilige manier aan KEDA worden doorgegeven:
+  
+`rabbitmq-trigger-auth.yaml:`
 
-Vervolgens heb ik een ScaledObject gedefinieerd om de scaling-logica te beheren. Dit object vertelt KEDA hoe en wanneer de microservice automatisch moet schalen op basis van de belasting van de RabbitMQ-wachtrij:
+```yaml
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: rabbitmq-trigger-auth
+  namespace: pitstop
+spec:
+  secretTargetRef:
+    - parameter: username
+      name: rabbitmq-secret
+      key: username
+    - parameter: password
+      name: rabbitmq-secret
+      key: password
+```
+
+##### ScaledObject
+
+Vervolgens heb ik een ScaledObject aangemaakt om de scaling van de `message-processor-service` te beheren op basis van de lengte van de `Invoicing-wachtrij` in RabbitMQ. Dit ScaledObject zorgt ervoor dat de `message-processor-service` opschaalt als er meer dan 5 berichten in de Invoicing-wachtrij staan, en terugschakelt als de belasting afneemt.
+
+`invoiceservice-scaledobject.yaml:`
 
 ```yaml
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: rabbitmq-scaledobject
-  namespace: default
+  name: message-processor-scaledobject
+  namespace: pitstop
 spec:
   scaleTargetRef:
-    kind: Deployment
     name: message-processor
-  pollingInterval: 30  # Interval waarmee KEDA de wachtrij controleert
-  cooldownPeriod: 300  # Tijd die KEDA wacht voordat het weer naar beneden schaalt
+  pollingInterval: 30  # Controleer elke 30 seconden de wachtrijstatus
+  cooldownPeriod: 300  # Wacht 5 minuten voordat het aantal replicas wordt verlaagd
   minReplicaCount: 1   # Minimale aantal replicas
   maxReplicaCount: 10  # Maximale aantal replicas
   triggers:
-  - type: rabbitmq
-    metadata:
-      queueName: my-queue
-      host: amqp://<rabbitmq-host-url>
-      queueLength: "5"  # Schaal als er meer dan 5 berichten in de wachtrij staan
+    - type: rabbitmq
+      metadata:
+        queueName: Invoicing  # De naam van de RabbitMQ-wachtrij die wordt gemonitord
+        queueLength: "5"  # Schaal als er meer dan 5 berichten in de wachtrij staan
+        host: amqp://rabbitmq.pitstop.svc.cluster.local:5672
+      authenticationRef:
+        name: rabbitmq-trigger-auth
+      fallback:
+        failureThreshold: 3
+        replicas: 2
 ```
 
-Dit ScaledObject zorgt ervoor dat de message-processor-service opschaalt als er meer dan 5 berichten in de wachtrij staan, en terugschakelt als de belasting afneemt.
+Uitleg:
+
+- **scaleTargetRef:** Geeft aan dat KEDA verantwoordelijk is voor het schalen van de invoiceservice Deployment.
+- **pollingInterval:** Bepaalt het interval voor het controleren van de lengte van de RabbitMQ-wachtrij (30 seconden).
+- **cooldownPeriod:** Bepaalt de wachttijd voordat de service wordt afgeschaald (5 minuten).
+- **minReplicaCount en maxReplicaCount:** Definiëren de schaalbereik voor de invoiceservice.
+- **triggers:**
+  - **type:** `rabbitmq` specificeert dat de scaling wordt getriggerd op basis van een RabbitMQ-wachtrij.
+  - **queueName:** De I`nvoicing-wachtrij` in RabbitMQ die KEDA zal monitoren.
+  - **queueLength:** De drempelwaarde voor scaling. Als de Invoicing-wachtrij meer dan 10 berichten bevat, zal KEDA de service opschalen.
+  - **host:** De connectiestring voor RabbitMQ, met gebruik van het interne serviceadres van RabbitMQ in de `pitstop` namespace.
+  - **authenticationRef:** Verwijst naar de `rabbitmq-trigger-auth` om de RabbitMQ-inloggegevens op een veilige manier te gebruiken.
+  - **fallback:** Zorgt ervoor dat als KEDA geen gegevens kan ophalen of geen verbinding kan maken met RabbitMQ na 3 opeenvolgende pogingen, het aantal replicas naar 2 wordt ingesteld om basisbeschikbaarheid te waarborgen.
 
 ### Stap 4: Testen van de Scaling
 
-Om te testen of KEDA correct werkt, heb ik berichten in de RabbitMQ-wachtrij geplaatst en geobserveerd hoe KEDA de microservice automatisch opschaalde. Met het commando kubectl get deployments kon ik het aantal actieve replicas monitoren.
+Om te controleren of KEDA correct functioneert, heb ik handmatig berichten in de RabbitMQ-wachtrij geplaatst en geobserveerd hoe KEDA de `message-processor` automatisch opschaalde. Dit zijn de stappen die ik heb gevolgd:
 
-Tijdens de test schaalde de microservice omhoog naarmate de berichten in de wachtrij toenamen, en terug naar beneden zodra de wachtrij weer leeg was. Dit toonde aan dat KEDA effectief de belasting van de microservice kon beheren op basis van de events.
+- **Monitoring van replicas:**
+Ik gebruikte het volgende commando om de status van de `message-processor-deployment` te monitoren:
+
+```bash
+kubectl get deployments -n pitstop
+```
+
+Dit commando zorgt ervoor dat ik realtime veranderingen in het aantal actieve replicas kon volgen.
+
+- **Resultaten van de test:**
+Tijdens de test schaalde de `message-processor` omhoog naarmate het aantal berichten in de `Invoicing-wachtrij` toenam en weer terug naar beneden zodra de wachtrij leeg was. Dit toonde aan dat KEDA de belasting van de microservice effectief kon beheren op basis van de wachtrij in RabbitMQ.
+
+
+Met deze configuratie kan Pitstop nu automatisch reageren op veranderingen in de belasting van de RabbitMQ-wachtrijen, wat zorgt voor een efficiënter gebruik van resources en een betere schaalbaarheid van de services.
 
 ## Bronnen
 

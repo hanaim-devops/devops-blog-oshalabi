@@ -189,6 +189,8 @@ spec:
       key: password
 ```
 
+Bron: [Auth with triggerauthentication](https://keda.sh/docs/2.15/concepts/authentication/#re-use-credentials-and-delegate-auth-with-triggerauthentication)
+
 ##### ScaledObject
 
 Vervolgens heb ik een ScaledObject aangemaakt om de scaling van de `message-processor-service` te beheren op basis van de lengte van de `Invoicing-wachtrij` in RabbitMQ. Dit ScaledObject zorgt ervoor dat de `message-processor-service` opschaalt als er meer dan 5 berichten in de Invoicing-wachtrij staan, en terugschakelt als de belasting afneemt.
@@ -235,6 +237,8 @@ Uitleg:
   - **authenticationRef:** Verwijst naar de `rabbitmq-trigger-auth` om de RabbitMQ-inloggegevens op een veilige manier te gebruiken.
   - **fallback:** Zorgt ervoor dat als KEDA geen gegevens kan ophalen of geen verbinding kan maken met RabbitMQ na 3 opeenvolgende pogingen, het aantal replicas naar 2 wordt ingesteld om basisbeschikbaarheid te waarborgen.
 
+Bron: [ScaledObject](https://keda.sh/docs/2.15/reference/scaledobject-spec/)
+
 ### Stap 4: Testen van de Scaling
 
 Om te controleren of KEDA correct functioneert, heb ik handmatig berichten in de RabbitMQ-wachtrij geplaatst en geobserveerd hoe KEDA de `message-processor` automatisch opschaalde. Dit zijn de stappen die ik heb gevolgd:
@@ -251,8 +255,11 @@ Dit commando zorgt ervoor dat ik realtime veranderingen in het aantal actieve re
 - **Resultaten van de test:**
 Tijdens de test schaalde de `message-processor` omhoog naarmate het aantal berichten in de `Invoicing-wachtrij` toenam en weer terug naar beneden zodra de wachtrij leeg was. Dit toonde aan dat KEDA de belasting van de microservice effectief kon beheren op basis van de wachtrij in RabbitMQ.
 
-
 Met deze configuratie kan Pitstop nu automatisch reageren op veranderingen in de belasting van de RabbitMQ-wachtrijen, wat zorgt voor een efficiënter gebruik van resources en een betere schaalbaarheid van de services.
+
+## Conclusie
+
+In dit blog heb ik de voordelen van KEDA voor event-driven autoscaling in Kubernetes belicht en de praktische toepassing ervan onderzocht binnen een microservices-omgeving zoals Pitstop. KEDA biedt een flexibele en efficiënte manier om schaalbaarheid te automatiseren op basis van externe events, wat vooral nuttig is in dynamische DevOps-omgevingen. De combinatie met Kubernetes HPA zorgt voor een krachtige oplossing die verder gaat dan traditionele resource-based scaling. Hoewel de leercurve en complexiteit uitdagingen kunnen vormen voor kleinere projecten, toont de testconfiguratie aan dat KEDA een waardevolle toevoeging kan zijn voor organisaties die efficiënt willen omgaan met fluctuaties in de belasting. Hiermee hoop ik anderen te inspireren om KEDA te overwegen als een oplossing voor hun schaalbehoeften.
 
 ## Bronnen
 
@@ -262,3 +269,5 @@ Met deze configuratie kan Pitstop nu automatisch reageren op veranderingen in de
 - KEDA. (z.d.). KEDA. https://keda.sh/
 - Tomkerkhove. (2024, 6 augustus). Kubernetes Event-driven Autoscaling (KEDA) - Azure Kubernetes Service. Microsoft Learn. https://learn.microsoft.com/en-us/azure/aks/keda-about#capabilities-and-features
 - Singh, G. (2024, 8 oktober). KEDA (Kubernetes Event-driven Autoscaling). XenonStack. https://www.xenonstack.com/blog/kubernetes-event-driven-autoscaling
+- KEDA | Authentication. (z.d.). KEDA. https://keda.sh/docs/2.15/concepts/authentication/#authentication-scopes-namespace-vs-cluster KEDA | ScaledObject specification. (z.d.). KEDA. https://keda.sh/docs/2.15/reference/scaledobject-spec/
+- KEDA | ScaledObject specification. (z.d.). KEDA. https://keda.sh/docs/2.15/reference/scaledobject-spec/

@@ -34,11 +34,11 @@ Voor mijn minor DevOps aan de HAN ga ik een onderzoek doen naar KEDA (Kubernetes
 - **Onderzoeksmethode**: Literatuuronderzoek. Vergelijken van KEDA met andere autoscaling-oplossingen zoals HPA (Horizontal Pod Autoscaler) en tools zoals Knative.
 - **Verwachte bronnen**: Officiële documentatie van HPA en Knative, vergelijkende artikelen, technische blogs.
 
-### Deelvraag 5: Hoe pas ik KEDA toe in het klein
+### Deelvraag 5: Hoe pas ik KEDA toe PitStop MSA applicatie
 
-- **Doel**: Inzicht krijgen in de praktische implementatie van KEDA binnen een kleinschalig microservice-project.
-- **Onderzoeksmethode**: Praktijktest. Zelf een Kubernetes-cluster opzetten en KEDA configureren voor een eenvoudige microservice-applicatie.
-- **Verwachte bronnen**: Eigen experiment, tutorials en installatiehandleidingen.
+- **Doel**: Onderzoeken hoe KEDA kan worden geïmplementeerd binnen de PitStop microservices-architectuur voor event-driven autoscaling.
+- **Onderzoeksmethode**: Praktijkonderzoek door KEDA te configureren in een testomgeving van de PitStop MSA en de resultaten te analyseren.
+- **Verwachte bronnen**: KEDA-documentatie, tutorials, technische blogs, PitStop MSA-documentatie, en Kubernetes-community-forums.
 
 ## Planning (1 week)
 

@@ -13,7 +13,7 @@ In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema.
 
 **KEDA** is eingelijk een lichtgewicht component dat een DevOps-team kan toeveogen aan Kubernetes-cluster. Daarnaast werkt KEDA samen met de standaard Kubernetes-componenten zoals de [HPA(Horizontal Pod Autoscaler)](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en kan functionaliteit uitbreiden zonder te overschrijven of dupliceren.
 
-**KEDA** is gebouwd op Kubernetes [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en schaalt pods op basis van informatie uit event sources zoals AWS SQS, Kafka, RabbitMQ, etc. Deze event worden bewaakt met scalers, die implementaties activeren of deactiveren op basis van de regels die voor hen zijn ingesteld. KEDA-scalers kunnen ook aangepaste metrische gegevens voor een specifieke event  invoeren, zodat DevOps-teams metrische gegevens kunnen observeren die voor hen relevant zijn.
+**KEDA** is gebouwd op Kubernetes [HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) en schaalt pods op basis van informatie uit event sources zoals AWS SQS, Kafka, RabbitMQ, etc. Deze events worden bewaakt met scalers, die implementaties activeren of deactiveren op basis van de regels die voor hen zijn ingesteld. KEDA-scalers kunnen ook aangepaste metrische gegevens voor een specifieke event  invoeren, zodat DevOps-teams metrische gegevens kunnen observeren die voor hen relevant zijn.
 
 <figure>
     <img src="plaatjes/different-kubernetes-autoscaling-features-vpa-keda-and-hpa.png"

@@ -2,7 +2,7 @@
 
 <img src="plaatjes/keda.png" width="250" align="right" alt="keda logo om weg te halen" title="KEAD(Kubernetes Event-Driven Autoscaling)">
 
-*[Osama Halabi, oktober 2024.](https://github.com/hanaim-devops/devops-blog-oshalabi)*
+*[Osama Halabi, Januari 2025.](https://github.com/hanaim-devops/devops-blog-oshalabi)*
 <hr/>
 
 In de wereld van DevOps en microservices is schaalbaarheid een belangrijk thema. Met de opkomst van Kubernetes als platform voor het beheren van containergebaseerde applicaties, zijn er verschillende manieren ontstaan om applicaties automatisch te schalen. In dit blog wil ik ingaan op KEDA (Kubernetes Event-Driven Autoscaling), een tool die het mogelijk maakt om applicaties te schalen op basis van externe events (Sahoo, 2023). Ik schrijf dit blog om inzicht te krijgen in wat KEDA is, hoe KEDA werkt, wat de voordelen en nadelen zijn, en hoe ik het kan toepassen in een microservice-omgeving zoals Pitstop. Daarnaast wil ik met deze blogpost anderen inspireren om KEDA te overwegen als een oplossing voor schaalproblemen in hun eigen DevOps-omgevingen.
